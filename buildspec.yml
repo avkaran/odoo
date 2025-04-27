@@ -1,0 +1,22 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 18
+    commands:
+      - echo Installing AWS CLI and Docker
+      - apt-get update -y
+      - apt-get install -y awscli
+  build:
+    commands:
+      - echo Building the Docker image...
+      - docker build -t odoo:17 .
+      - echo Tagging the image...
+      - docker tag odoo:17 407389197475.dkr.ecr.eu-north-1.amazonaws.com/odoo-repo:latest
+  post_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region <your-region> | docker login --username AWS --password-stdin <aws_account_id>.dkr.ecr.<your-region>.amazonaws.com
+      - echo Pushing the Docker image to ECR...
+      - docker push <aws_account_id>.dkr.ecr.<your-region>.amazonaws.com/odoo-repo:latest
